@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>music</title>
+    <style>
+      body {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+          url('public/sea.jpg');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        color: white;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        padding: 0;
+      }
+
+      nav li {
+        margin: 0 10px;
+      }
+
+      nav a {
+        color: white;
+      }
+
+      h1 {
+        font-family: 'Impact', sans-serif;
+      }
+
+      .subtitle {
+        text-align: center;
+      }
+
+      .main_title {
+        text-align: center;
+        font-size: 60px;
+        font-family: 'Impact', sans-serif;
+      }
+
+      .intro {
+        font-size: large;
+        font-style: italic;
+        margin: 0 30px 0 30px;
+      }
+
+      .group {
+        display: flex;
+        justify-content: center;
+        margin: 80px;
+      }
+
+      .group_title {
+        writing-mode: vertical-rl;
+        text-align: center;
+        font-size: 70px;
+        font-family: 'Impact', sans-serif;
+      }
+
+      img {
+        width: 250px;
+        height: auto;
+        margin: 0 20px 0 20px;
+      }
+
+      .select_emotion {
+        margin: 0 20px 0 20px;
+        font-size: 20px;
+        font-style: italic;
+      }
+
+      .image_container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .image_text {
+        flex: 0 0 25%; /* 4つの画像を1行に並べる */
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .image_text p {
+        color: white;
+        font-size: 20px;
+        margin: 0;
+      }
+
+      .image_text img {
+        max-width: 100%;
+        height: auto; /* アスペクト比を保ったまま高さを自動調整 */
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+
+      .music_group {
+        display: flex;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 1s ease;
+      }
+
+      /* このCSSは、.music_group要素が初めてロードされたときには透明にし、showクラスが追加されたときに要素を表示します。
+      transitionプロパティを使用して、要素が表示される速度を制御します。 */
+      .music_group.show {
+        opacity: 1;
+      }
+
+      .music_emotion {
+        writing-mode: vertical-rl;
+        text-align: center;
+        font-size: 70px;
+        font-family: 'Impact', sans-serif;
+      }
+
+      .music_details {
+        width: 1200px;
+        text-align: center;
+      }
+
+      .music_item {
+        display: flex;
+        text-align: center;
+        margin: 30px;
+      }
+
+      .song_name {
+        font-size: 35px;
+        font-weight: bold;
+        margin-top: 15px;
+        font-style: italic;
+      }
+
+      a {
+        color: white;
+      }
+
+      .artist_name {
+        font-size: 20px;
+      }
+
+      p:first-of-type {
+        font-style: italic;
+      }
+
+      p:nth-of-type(2) {
+        font-weight: bold;
+        margin-top: 15px;
+        font-style: italic;
+        font-size: 30px;
+      }
+
+      p:nth-of-type(3) {
+        font-style: italic;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      footer img {
+        width: auto;
+      }
+
+      /* スマートフォン向けのスタイル */
+      @media (max-width: 767px) {
+        .music_item {
+          width: 100%; /* 幅を100%にする */
+        }
+        .music_item iframe {
+          width: 100%; /* iframeも幅を100%にする */
+        }
+      }
+
+      .round-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: inline-block;
+        padding: 15px 30px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        background-color: #3498db;
+        border-radius: 200px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 30px;
+      }
+
+      .round-button:hover {
+        background-color: #2980b9; /* ホバー時の色変化 */
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const images = document.querySelectorAll('.image_text img')
+        images.forEach((image, index) => {
+          image.style.opacity = 0
+          image.style.transition = 'opacity 1s ease'
+          setTimeout(() => {
+            image.style.opacity = 1
+          }, 100 * index) // インデックスに応じて遅延させる
+        })
+      })
+
+      //このコードは、ユーザーがスクロールするたびに実行され、各.music_group要素がビューポートの内部に入ったときにshowクラスを追加します。
+      window.addEventListener('scroll', function () {
+        const musicGroups = document.querySelectorAll('.music_group')
+        const windowHeight = window.innerHeight
+
+        musicGroups.forEach(function (musicGroup) {
+          const musicGroupTop = musicGroup.getBoundingClientRect().top
+          if (musicGroupTop < windowHeight) {
+            musicGroup.classList.add('show')
+          }
+        })
+      })
+
+      //ボタンを押した時にページの一番上に遷移する
+      document.addEventListener('DOMContentLoaded', function () {
+        const button = document.querySelector('.round-button')
+        button.addEventListener('click', function (event) {
+          event.preventDefault() // デフォルトのアンカーの動作をキャンセル
+          window.scrollTo({
+            top: 0, // ページの一番上にスクロール
+            behavior: 'smooth', // スムーズにスクロール
+          })
+        })
+      })
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>Music Trip</h1>
+      <nav>
+        <ul>
+          <li><a href="#fun-section">Fun</a></li>
+          <li><a href="#clam-section">Clam</a></li>
+          <li><a href="#love-section">Love</a></li>
+          <li><a href="#work-section">Work</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <div>
+        <div class="subtitle">〜あなたの気分に合わせた音楽を〜</div>
+        <div class="main_title">Music Trip</div>
+      </div>
+      <div class="group">
+        <div class="group_title">About</div>
+        <div>
+          <div class="intro">
+            人生の様々な瞬間において、感情が高まる時、音楽は心の支えとなります。<br />
+            喜びや笑顔の瞬間には、陽気で明るいメロディが心を躍らせ、特別な瞬間を彩ります。<br />
+            悲しい時には、深い感情を表現した音楽が共感し、慰めとなります。<br />
+            ドキドキした時、音楽は興奮と期待感を一層高め、瞬間を特別なものに変えてくれます。<br />
+            そして、頑張りたい時には、力強いメロディや励ましの歌詞が勇気を与えてくれます。<br />
+            音楽は感情と共に歩む素晴らしいパートナーであり、このサイトはそんなあなたを支えます。<br />
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group_title">Emotion</div>
+        <div class="image_container">
+          <div class="image_text">
+            <a href="#fun-section">
+              <img src="public/fun.jpg" alt="Fun Image" />
+              <div class="select_emotion">Fun</div>
+            </a>
+          </div>
+          <div class="image_text">
+            <a href="#clam-section">
+              <img src="public/sad.jpg" alt="Image 2" />
+              <div class="select_emotion">Calm</div>
+            </a>
+          </div>
+          <div class="image_text">
+            <a href="#love-section">
+              <img src="public/love.jpg" alt="Image 3" />
+              <div class="select_emotion">Love</div>
+            </a>
+          </div>
+          <div class="image_text">
+            <a href="#work-section">
+              <img src="public/work.jpg" alt="Image 4" />
+              <div class="select_emotion">Work</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="music_group">
+        <div id="fun-section" class="music_emotion">Fun</div>
+        <div class="song_introduction">
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/6IEqiEgTQn4FwE0seKXFZO?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「Lovers」</span>
+              <span class="artist_name">sumika</span>
+              <p>
+                sumikaは数々の名曲を生み出している大人気のアーティストですが、その曲の中でもこの「Lovers」は特に大人気。<br />
+                カラオケで歌うと必ず盛り上がること間違いなし！加えてそのポップなこの曲調とは裏腹に「本当の恋とは何か」と考えられるその歌詞にも注目！
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                2013年の結成以来、清涼感のあるサウンドで中毒者を急増させているロックバンド、sumika（スミカ）。<br />
+                爽やかな曲調と力強い声が特徴のこのグループは特に若者の間で大人気であり、2018年には日本武道館でライブを成功させた、非常に勢いのあるバンドです。
+              </p>
+            </div>
+          </section>
+
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/5ECLAcvtGoWJBojHEscwop?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「怪獣」</span>
+              <span class="artist_name">PEOPLE1</span>
+              <p>
+                「さあさあ怪獣にならなくちゃ 等身大じゃ殺されちゃう
+                でもでも怪獣にならなくちゃ
+                誰よりも優しいやつ」と強烈なフレーズで始まるこの曲。<br />
+                サビに近づくにつれて盛り上がりが大きくなり、歌いやすサビなのでみんなでも歌いやすいです！
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                2019年にデビューしたPEOPLE
+                1は、活動開始から1年も経たないうちに楽曲やおしゃれな映像が話題となり、<br />
+                YouTubeやサブスクリプションを中心に邦ロックファンから人気を集めている。<br />
+                ボーカルが二人いるこのグループは歌い手によってグループ全体の雰囲気が大きく変化するため、いつ聞いても飽きません！
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="music_group">
+        <div id="clam-section" class="music_emotion">Calm</div>
+        <div class="song_introduction">
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/1Ppu2rlgrZz0pfcRl20vpC?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「Bedroom Talk」</span>
+              <span class="artist_name">Official髭男dism</span>
+              <p>
+                Official髭男dismのアルバム曲は、その多くをボーカルの藤原さんが作詞作曲を務めているが、この曲はギターの小笹さんが担当している。<br />
+                「いつも気に留めないような言葉が振り切れない
+                そんな夜からこの頃逃げ出せなくて」という歌詞から始まり、日々の辛さを独り言のように語って
+                いくこの曲は、「少し疲れたな」と思った時に聞くとスッキリするかも...!
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                2012年に結成された4人グループ。「ヒゲダン」の愛称で若者をはじめとする幅広い世代から支持されている人気アーティスト。<br />
+                2018年に月9ドラマ「コンフィデンスマンJP」の主題歌として「ノーダウト」が起用され一気に大人気のグループへと成長していきました!<br />
+              </p>
+            </div>
+          </section>
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/1HD7YyTYAQ4LPussdtj7Ui?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「くだらないの中に」</span>
+              <span class="artist_name">星野源</span>
+              <p>
+                好きな人と過ごすなんでもない時間を大切にする、そんな気持ちが込められたバラード曲。<br />
+                最後のサビでは「流行に呑まれ人は進む 周りに呑まれ街はゆく
+                僕は時代のものじゃなくて あなたのものになりたいんだ」と<br />
+                愛する人にとってよければそれで良いという歌詞が印象的です！
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                実は元々「大人計画」という事務所に舞台俳優として所属していた星野源さん。<br />
+                アーティストとしてデビューした後は「SUN」や「恋」など数々のヒット曲を生み出し、今では国民的歌手の一人である。<br />
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="music_group">
+        <div id="love-section" class="music_emotion">Love</div>
+        <div class="song_introduction">
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/27JYLXXMJcpqjAOxOBEQwr?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「pink」</span>
+              <span class="artist_name">シャイトープ</span>
+              <p>
+                女性目線から描かれているこの曲は、かつての恋人のことを思い出しながらも忘れられない失恋ソングとなっています。<br />
+                「運命だと思ってたけど
+                よく似た別のものだったみたいね」と懐かしい日々を思い出しては悲しくなってしまう
+                女性の心のうちが表現されています。
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                「ランデブー」や「部屋」など数々の恋愛ソングをリリースし近年若者から絶大な支持を受けているシャイトープ。<br />
+                現代の恋愛観が忠実に再現されており、悲しげな歌い方が多くの人たちの共感を得ており、TikTokなどで大人気となった。<br />
+              </p>
+            </div>
+          </section>
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/3wGesqRt3l2D4ZmYCv9A11?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「花束」</span>
+              <span class="artist_name">back number</span>
+              <p>
+                back
+                numberの代表曲であるこの「花束」。主人公の男性が愛する女性に対してさまざまな形の愛を伝えるラブソング<br />
+                となっています！サビの「ごめん ごめん ありがとう
+                ごめんくらいのバラスになる危険性は少し高いけど」<br />
+                から、頼りない自分を許してほしいという男性の気持ちも伺えます。
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                back numberとは、清水 依与吏さん、栗原
+                寿さん、小島和也さんの群馬県出身の3人で構成されたロックバンドです。<br />
+                男性目線のラブソングが特徴的で、心の中の感情や気持ちの繊細な部分を忠実に再現していることから多くの人の心を掴んでいます。
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="music_group">
+        <div id="work-section" class="music_emotion">Work</div>
+        <div class="song_introduction">
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/3Ztjw8utVpcrzms1RrsJvR?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「全力少年」</span>
+              <span class="artist_name">スキマスイッチ</span>
+              <p>
+                この曲は主人公が目標に向かって努力するも、なかなか結果が出ない日々に悩み苦しむことが歌詞のさまざまなところで表現されています。<br />
+                「積み上げたものぶっ壊して 身につけたもの取っ払って
+                止め処ない血と汗で乾いた脳を潤せ
+                あの頃の僕らはきっと全力で少年だった セカイを開くのは誰だ？」<br />
+                など過去の自分の輝きを思い出し夢に向かって突き進む姿が描かれています！
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                スキマスイッチは1999年に結成された音楽ユニットで、大橋卓弥さんと常田慎太郎さんの2人で構成されています。<br />
+                ボーカル大橋さんの温かく包み込むような歌声と、ピアノ常田さんの音楽的アレンジが特徴的なこのユニットは幅広い世代に今でも愛されているグループです！<br />
+              </p>
+            </div>
+          </section>
+          <section class="music_item">
+            <iframe
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/track/0yeMceaGqfPNLWzflUg079?utm_source=generator"
+              width="250px"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+            <div class="music_details">
+              <span class="song_name">「できっこないを やらなくちゃ」</span>
+              <span class="artist_name">サンボマスター</span>
+              <p>
+                この曲はタイトルからも想像できるように「あなたならできる！あきらめないで」ということを率直に伝えてくれる応援ソングとなっています。
+                ボーカルの山口さんの力強い歌声と歌詞が特徴で、「よし！頑張ろう！」と思わせてくれるような曲となっています！
+              </p>
+              <p>アーティスト紹介</p>
+              <p>
+                サンボマスターは2000年に結成された三人組のロックバンドです。<br />
+                スポ根のような熱い歌詞と力強い歌声でライブを大盛り上がりさせ、見る人聞く人全てを引き込むとても魅力的なバンドです！<br />
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+      <a href="#" class="round-button">↑</a>
+    </main>
+    <footer>
+      <p
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:dct="http://purl.org/dc/terms/"
+      >
+        <span property="dct:title">study</span> is licensed under
+        <a
+          href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1"
+          target="_blank"
+          rel="license noopener noreferrer"
+          style="display: inline-block"
+          >Attribution-ShareAlike 4.0 International<img
+            style="
+              height: 22px !important;
+              margin-left: 3px;
+              vertical-align: text-bottom;
+            "
+            src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" /><img
+            style="
+              height: 22px !important;
+              margin-left: 3px;
+              vertical-align: text-bottom;
+            "
+            src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" /><img
+            style="
+              height: 22px !important;
+              margin-left: 3px;
+              vertical-align: text-bottom;
+            "
+            src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"
+        /></a>
+      </p>
+    </footer>
+  </body>
+</html>
